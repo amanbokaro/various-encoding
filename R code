@@ -1,0 +1,33 @@
+cesro <- dummy.data.frame(cesro, names=c("impact_time_frame"), sep="_")
+cesro <- dummy.data.frame(cesro, names=c("motivation"), sep="_")
+cesro <- dummy.data.frame(cesro, names=c("denied_not_applied"), sep="_")
+cesro <- dummy.data.frame(cesro, names=c("card_type"), sep="_")
+cesro <- dummy.data.frame(cesro, names=c("why_denied_credit"), sep="_")
+y= as.data.frame(unique(cesro[,c('channel','OriginalAssignedSegmentNumber')] %>%
+  group_by(channel,OriginalAssignedSegmentNumber ) %>%
+  mutate(count = n())))
+
+cesro=merge(cesro, y, by=c("channel","OriginalAssignedSegmentNumber"))
+
+cesro$channel=NULL
+
+
+#imputing missing values
+
+colnames(cesro)[apply(is.na(cesro), 2, any)]
+
+#visualization of missing values
+
+library(VIM)
+aggr_plot <- aggr(cesro, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, labels=names(data), cex.axis=.7, gap=3, ylab=c("Histogram of missing data","Pattern"))
+
+#imputation 
+str(cesro$total_civil_claims)
+colnames(cesro)
+
+
+tempData <- mice(cesro[,c(3,12,31,69,41:94)],m=1,maxit=50,meth='pmm',seed=500)
+
+completedData <- complete(tempData,1)
+ imputedcesro<-cbind(cesro,completedData)
+ cesro =imputedcesro[,-c(3,12,31,69,41:94)]
